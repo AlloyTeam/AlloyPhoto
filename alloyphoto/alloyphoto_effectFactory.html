@@ -1,0 +1,112 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+  <meta name="author" content="Tencent.AlloyTeam.Dorsywang" />
+  <meta name="copyright" content="Tencent.AlloyTeam" />
+  <meta name="keywords" content="alloyPhoto 简约版,alloyImage,alloyPhoto,html5 canvas,alloyTeam" />
+  <meta name="description" content="alloyPhoto简约版，一款基于alloyImage库的图像处理应用,alloyImage是基于html5的图像处理js代码库。" />
+  
+	<title>AlloyPhoto 简约版--Tencent AlloyTeam</title>
+  <link media="all" rel="stylesheet" href="style/main.css" type="text/css" />
+  <link media="all" rel="stylesheet" href="style/alloyphoto.css" type="text/css" />
+  <link media="all" rel="stylesheet" href="style/bar.style.css" type="text/css" />
+  <link media="all" rel="stylesheet" href="style/effectFatory.css" type="text/css" />
+</head>
+<body>
+<div class="header">AlloyPhoto 效果工厂（尝试版）</div>
+<div class="wrapper">
+  <ul class="effectsFactory">
+
+ </ul>
+</div>
+<div class="command">
+  <div class="footer">
+    <div class="links">
+      <a href="alloyphotopro.html">专业版</a> &nbsp;&nbsp;<a href="http://alloyteam.github.com/AlloyPhoto/" target="_blank">Docs</a> &nbsp;&nbsp;<a target="_blank" href="http://www.dorsywang.com">Blog</a>
+    </div>
+    <div class="copyright">Copyright &copy; <script>document.write(new Date().getFullYear());</script> <a href="http://www.AlloyTeam.com/" target="_blank">Tencent AlloyTeam</a>. All Rights Reserved.</div>
+  </div>
+</div>
+<input type="file" name="open" id="open" class="open" />
+<div class="runtimePanel">
+  <div class="close">X</div>
+  <h3 class="title">title</h3>
+  <div class="runtimeWrapper">
+    <div class="source">
+      <div class="closeSource">>>></div>
+      <div class="codeWrapper">
+        <pre id="souceCode">
+          //定义效果代码 可移植
+          $AI.define("scale", function(img){
+            return $AI(img).ps("sketch");
+          });
+          
+          //使用效果代码 依赖AP
+          //要求弹出图片加载框
+          $AP.require("img", function(img){
+             var layer = $AI(img).ps("scale");
+             
+             //显示处理后图片
+             $AP.show(layer);   
+          });
+        </pre>
+      </div>
+    </div>
+  
+    <div class="content">
+      <ul class="oper">
+        <li class=""><a class="button button-green runCode"><span>使用效果</span></a></li>
+        <li class=""><a class="button button-orange" id="checkCode"><span>查看源码</span></a></li>
+      </ul>
+      <div id="showPic"></div>
+    </div>
+
+  <div class="aside">
+      <h4>效果详情</h4>
+      <ul class="info">
+        <li>依赖项: back.png</li>
+        <li>人工参与：否</li>
+        <li>预计耗时: 0.5s</li>
+        <li>建议图片大小：无</li>
+        <li>效果描述：无</li>
+      </ul>
+      <div class="download" id="download">
+        <a class="button">
+          <span>下载处理后图片</span>
+        </a>
+      </div>
+    </div>
+
+    <div style="display: none;">
+      <h2>相关参数设定</h2>
+      <ul class="param">
+        <li><label>色彩文字</label><input /></li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+<script type="text/javascript">
+
+/*
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-23019343-9']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+    */
+
+</script>
+<script type="text/javascript" src="../alloyimage/combined/alloyimage.js"></script>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/ace.js"></script>
+<script type="text/javascript" src="js/alloyphoto.js"></script>
+<script type="text/javascript" src="js/effectsList.js"></script>
+<script type="text/javascript" src="js/effectFactory.js"></script>
+</body>
+</html>

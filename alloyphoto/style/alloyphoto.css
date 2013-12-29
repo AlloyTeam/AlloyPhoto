@@ -1,0 +1,30 @@
+.alloyPhotoBox{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    box-shadow: 0 0 3px 0px #000;
+    -webkit-box-shadow: 0 0 3px 0px #000;
+    z-index: 10000;
+    background: #fff;
+    border-radius: 4px;
+}
+.alloyPhotoBox h3{
+    margin: 0;
+    padding: 5px;
+    background: #229bd7;
+}
+.alloyPhotoBox .boxContent{
+    padding: 20px;
+    color: #6576AC;
+    text-shadow: none;
+    -webkit-text-shadow: none;
+    box-shadow: 0 -3px 4px 0 rgba(119, 113, 113, 0.64);
+    -webkit-box-shadow: 0 -3px 4px 0 rgba(119, 113, 113, 0.64);
+}
+.alloyPhotoBox .fileWrapper{
+    text-align:center;
+}
+.alloyPhotoBox .fileButton{
+    float: none;
+    margin-top: 65px;
+}
