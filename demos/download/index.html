@@ -1,0 +1,94 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+  <style type="text/css">
+.processBar{
+  width: 0;
+  -webkit-transition: all ease-in 0.2s;
+  margin: 20px 40px;
+  background: blue;
+  height: 30px;
+}
+  </style>
+</head>
+<body>
+
+<h1>使用JS下载，而不是浏览器下载Demo</h1>
+<description>
+  通常情况下，我们的下载文件是浏览器自动下载的，我们无法控制浏览器的下载行为。这个示例将展示用JS来主动下载文件，控制下载的行为等。
+</description>
+<br />
+<br />
+<br />
+
+<button id="file1">下载文件一 自动保存</button>
+<button id="file2">下载文件二 敏感信息提示保存</button>
+<br />
+<br />
+<br />
+<h2>文件下载信息</h2>
+<div id="loaded"></div>
+<div class="processBar" id="processBar"></div>
+<div>
+  下载速度<span id="speed">0</span> KB/S
+</div>
+
+<div id="time"></div>
+	
+<script src="FileSaver.js" type="text/javascript"></script>
+<script type="text/javascript">
+function downloadFile(url, success) {
+    var xhr = new XMLHttpRequest(); 
+    xhr.open('GET', url, true); 
+    xhr.responseType = "blob";
+    xhr.onreadystatechange = function () { 
+        if (xhr.readyState == 4) {
+            document.getElementById("time").innerHTML = "下载耗时：" + (+ new Date - startTime) / 1000 + "s";
+            if (success) success(xhr.response);
+        }
+    };
+
+    var lastLoaded = 0, speed = 0, lastTime = + new Date, startTime = lastTime;
+    var speedText = document.getElementById("speed");
+    var loadedInfo = document.getElementById("loaded");
+    var processBar = document.getElementById("processBar");
+
+    xhr.addEventListener("progress", function(e){
+        var currTime = + new Date;
+        var currLoaded = e.loaded;
+        var dT = currTime - lastTime;
+        var dL = currLoaded - lastLoaded;
+
+        lastTime = currTime;
+        lastLoaded = currLoaded;
+
+        speed = parseInt(dL / dT);
+        speedText.innerHTML = speed;
+
+        var percent = currLoaded / e.total;
+        loadedInfo.innerHTML = "文件大小： " + parseInt(e.total / 1024 / 1024) + "M，已下载：" + (currLoaded / 1024 / 1024) + "M  <br />进度：" + parseInt(percent * 100) + "%";
+
+        processBar.style.width = parseInt(percent * 100) + "%";
+
+    });
+    xhr.send(null);
+}
+
+/*
+*/
+document.getElementById("file1").onclick = function(){
+  downloadFile('houhuiwuqi.mp3', function(blob) {
+      saveAs(blob, "后悔无期.mp3");
+  });
+};
+
+document.getElementById("file2").onclick = function(){
+  downloadFile('houhuiwuqi.mp3', function(blob) {
+      saveAs(blob, "houhuiwuqi.exe");
+  });
+};
+</script>
+</body>
+</html>
