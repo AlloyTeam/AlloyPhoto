@@ -48,6 +48,9 @@ try{
         //模块池
         lib: [],
 
+        //外部定义的ps效果
+        definedPs: {},
+
         //初始化准备
         init: function(){
             this.require("config");
@@ -133,7 +136,7 @@ try{
         //组合效果映射器
         reflectEasy: function(effect){
             var fun = this.lib.config.getEasyFun(effect).actName;
-            return this.lib.easy.getFun(fun);
+            return this.definedPs[effect] || this.lib.easy.getFun(fun);
         },
 
         //合并一个图层到对象
@@ -159,6 +162,10 @@ try{
             }else{
                 throw new Error("AI_ERROR: 不存在的工具方法_" + actMethod);
             }
+        },
+
+        definePs: function(name, func){
+            this.definedPs[name] = func;
         }
     };
 
@@ -182,6 +189,17 @@ try{
                 context.fillStyle = height;
                 context.fillRect(0, 0, img, width);
 
+                this.srcImg = "";
+
+            }else if(typeof img == "string"){
+                var tmpImg = new Image();
+                tmpImg.onload = function(){
+                    canvas.width = parseInt(this.width);
+                    canvas.height = parseInt(this.height);
+
+                    context.drawImage(this, 0, 0, this.width, this.height);
+                };
+                tmpImg.src = img;
             }else{
                 canvas.width = parseInt(img.width);
                 canvas.height = parseInt(img.height);
@@ -192,6 +210,8 @@ try{
 
                 if(!isNaN(imgWidth)) context.drawImage(img, 0, 0, imgWidth, imgHeight);
                 else context.drawImage(img, 0, 0);
+
+                this.srcImg = img;
 
             }
 
@@ -214,6 +234,10 @@ try{
 
             this.ctxCanvas = ctxCanvas;
             this.ctxContext = canvas.getContext("2d");
+
+            //设置对象的宽高
+            this.width = this.canvas.width;
+            this.height = this.canvas.height;
 
             //默认使用worker进行处理
             this.useWorker = P.useWorker;
@@ -261,6 +285,11 @@ try{
     //获取配置信息
     window[Ps].getConfig = function(){
         return P.lib.config.getConfig();
+    };
+
+    //定义组合效果代码
+    window[Ps].define = function(name, func){
+        P.definePs(name, func);
     };
 
     //定义使用worker,需要给出alloyimage所在路径
@@ -315,6 +344,21 @@ try{
 
     //原型对象
     window[Ps].prototype = {
+        set width(w){
+            this.canvas.width = w;
+        },
+
+        set height(h){
+            this.canvas.height = h;
+        },
+
+        get width(){
+            return this.canvas.width;
+        },
+
+        get height(){
+            return this.canvas.height;
+        },
 
         //动作
         act: function(method, arg){
@@ -414,12 +458,30 @@ try{
             this.context.putImageData(this.tempPsLib.imgData, 0, 0);
 
             if(selector){
-                document.querySelector(selector).appendChild(this.canvas);
+                if(typeof selector == "string"){
+                    var el = document.querySelector(selector);
+                    el.appendChild(this.canvas);
+                }else{
+                    selector.appendChild(this.canvas);
+                }
             }else{
                 document.body.appendChild(this.canvas);
             }
 
             return this;
+        },
+
+        //替换到某元素里
+        replaceChild: function(selector){
+            var el;
+            if(typeof selector == "string"){
+                el = document.querySelector(selector);
+            }else{
+                el = selector;
+            }
+
+            el.innerHTML = "";
+            return this.show(el);
         },
 
         //替换原来的图片
@@ -436,7 +498,7 @@ try{
 
             if(img){
                 img.onload = function(){};
-                img.src = this.save(0, workerFlag);
+                img.src = this.save(0, 1, workerFlag);
             }
 
             return this;
@@ -542,9 +604,12 @@ try{
         },
 
         //返回一个合成后的图像 png base64
-        save: function(type, workerFlag){
+        //comRatio为压缩质量
+        save: function(type, comRatio, workerFlag){
             type = type || "png";
             type = type.toLowerCase();
+
+            comRatio = comRatio || 0.8;
 
             if(type == "jpg") type = "jpeg";
 
@@ -560,9 +625,10 @@ try{
                 }
             }
 
+            //如果没有挂接图片 直接返回
             if(! this.layers.length){
                 this.context.putImageData(this.imgData, 0, 0);
-                return this.canvas.toDataURL(mimeType); 
+                return this.canvas.toDataURL(mimeType, comRatio); 
             }
 
 
@@ -587,15 +653,48 @@ try{
             //以临时对象data显示
             this.context.putImageData(tempPsLib.imgData, 0, 0);
 
-            return this.canvas.toDataURL(); 
+            return this.canvas.toDataURL(mimeType, comRatio); 
         },
 
         //下载图片
-        saveFile: function(){
-            var fileData = this.save();
-            fileData = fileData.replace(/^data:image\/(?:(?:jpeg)|(?:png))/, "data:image/octet-stream");
+        saveFile: function(fileName, comRatio){
+            fileName = fileName || "AlloyImage合成图像.jpg";
+            comRatio = comRatio || 1;
 
-            window.location.href = fileData;
+            var formatReg = /.*.(jpg|png|gif|jpeg)$/g;
+            var format = "png";
+
+            if(formatReg.test(fileName)){
+                formatReg.lastIndex = 0;
+                format = formatReg.exec(fileName)[1];
+            }else{
+                fileName += ".png";
+            }
+
+            var fileData = this.save(format, comRatio);
+
+            var a = document.createElement('a');
+            a.href = fileData;
+            a.download = fileName;
+
+            var e = document.createEvent("HTMLEvents");
+            e.initEvent("click", false, false);
+
+            a.dispatchEvent(e);
+
+        },
+
+        download: function(fileName, comRatio){
+            this.saveFile(fileName, comRatio);
+        },
+
+        saveAsDataURL: function(){
+        },
+
+        saveAsBlob: function(){
+        },
+
+        saveAsBuffer: function(){
         },
 
         //绘制直方图
@@ -646,19 +745,21 @@ try{
 
         //组合效果
         ps: function(effect){
+            if(effect == "原图" || effect == "origin" || effect == ""){
+                return this;
+            }
+
             var fun = P.reflectEasy(effect);
-            var _this = this;
+            var psedPic = fun.call(this, this.canvas);
 
-            _this = fun.call(_this);
+            //this.logTime("组合效果" + effect);
 
-            this.logTime("组合效果" + effect);
-
-            return _this;
+            return psedPic;
         },
 
         //记录运行时间
         logTime: function(msg){
-            console.log(msg + ": " + (+ new Date() - this.startTime) / 1000 + "s");
+            //console.log(msg + ": " + (+ new Date() - this.startTime) / 1000 + "s");
         },
 
         //调用原生canvas.context接口
@@ -691,18 +792,83 @@ try{
         },
 
         //变换Matrix
-        transform: function(matrix){
+        //x0, y0坐标原点
+        transform: function(matrix, x0, y0){
+            //获取dorsyMath接口
+            var dM = window[Ps].dorsyMath();
+
             var ctx = this.ctxContext;
             ctx.putImageData(this.imgData, 0, 0);
 
+            //建立一个空的临时canvas
             var tempCtx = document.createElement("canvas").getContext("2d");
-            tempCtx.canvas.width = this.canvas.width;
-            tempCtx.canvas.height = this.canvas.height;
 
+            //计算变换后的canvas宽度
+            //原则  所有的变换不会记录平移带来的变的换，但会记录下平移导致的原点的平移，以叠加图层的时候减去这些平移造成的影响
+            //意味着图层自身所有的变换都不会丢失自己的图像信息 但会原点位置发生变化
+            //这样做会节省很大的无图像空间
+
+            //计算原有点变换后的点
+            var originPoint = [
+                new dM.Matrix([0, 0], "1*2"),
+                new dM.Matrix([0, this.canvas.height], "1*2"),
+                new dM.Matrix([this.canvas.width, 0], "1 * 2"),
+                new dM.Matrix([this.canvas.width, this.canvas.height], "1*2")
+            ];
+
+            var transformedPoint = [];
+            var transformMatrix = new dM.Matrix(matrix, "2*2");
+
+            for(var i = 0; i < originPoint.length; i ++){
+                transformedPoint.push(originPoint[i].mutiply(transformMatrix));
+            }
+
+            var maxX = Math.max(
+                transformedPoint[0].data[0][0],
+                transformedPoint[1].data[0][0],
+                transformedPoint[2].data[0][0],
+                transformedPoint[3].data[0][0]
+            );
+
+            var minX = Math.min(
+                transformedPoint[0].data[0][0],
+                transformedPoint[1].data[0][0],
+                transformedPoint[2].data[0][0],
+                transformedPoint[3].data[0][0]
+            );
+
+            var maxY = Math.max(
+                transformedPoint[0].data[0][1],
+                transformedPoint[1].data[0][1],
+                transformedPoint[2].data[0][1],
+                transformedPoint[3].data[0][1]
+            );
+
+            var minY = Math.min(
+                transformedPoint[0].data[0][1],
+                transformedPoint[1].data[0][1],
+                transformedPoint[2].data[0][1],
+                transformedPoint[3].data[0][1]
+            );
+
+            var width = ~~ (maxX - minX);
+            var height = ~~ (maxY - minY);
+
+            tempCtx.canvas.width = width;
+            tempCtx.canvas.height = height;
+
+            //将原点平移使图像显示出来 但图像的原点会发生变化
+            tempCtx.translate(- minX, - minY);
             tempCtx.transform.apply(tempCtx, matrix);
             tempCtx.drawImage(ctx.canvas, 0, 0);
 
-            this.imgData = tempCtx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+            this.canvas.width = width;
+            this.canvas.height = height;
+
+            this.width = width;
+            this.height = height;
+
+            this.imgData = tempCtx.getImageData(0, 0, width, height);
 
             return this;
         },
@@ -710,6 +876,61 @@ try{
         scale: function(x, y){
             var y = y || x;
             return this.transform([x, 0, 0, y, 0, 0]);
+        },
+
+        //缩放到宽度和高度
+        scaleTo: function(w, h){
+            var _this = this;
+            var width = this.width;
+            var height = this.height;
+
+            var scaleSizeX, scaleSizeY;
+
+            if(! h){
+                h = w * height / width;
+            }
+
+            if(! w){
+                w = h * (width / height);
+            }
+
+            //这里的代码在iphone上会导致倾斜
+            if(0 && this.srcImg){
+                var img = new Image();
+                img.width = w;
+                img.height = h;
+
+                document.body.appendChild(img);
+
+                img.style.width = w + "px";
+                img.style.height = ~~ h + "px";
+
+                img.src = this.srcImg.src;
+
+
+                var newAIObj = window[Ps](img, w, h);
+
+                document.body.removeChild(img);
+                img = null;
+
+                setTimeout(function(){
+                    if(_this.canvas.parentNode){
+                        _this.canvas.parentNode.replaceChild(newAIObj.canvas, _this.canvas);
+                        newAIObj.show();
+                    }
+                }, 10);
+
+                return newAIObj;
+
+            }else{
+
+                if(w && h){
+                    scaleSizeX = w / width;
+                    scaleSizeY = h / height;
+
+                    return this.scale(scaleSizeX, scaleSizeY);
+                }
+            }
         },
 
         //旋转 度
@@ -767,7 +988,7 @@ try{
 
 })("psLib");
 
-window.AlloyImage = $AI = window.psLib;
+window.AlloyImage = window.$AI = window.psLib;
 /**
  * @author: Bin Wang
  * @description: Main add
@@ -1344,8 +1565,8 @@ window.AlloyImage = $AI = window.psLib;
                 if(arg){
 
                     if(isNaN(arg)){
-                        var m = /(\d+)\*/.exec(arg)[1];
-                        var n = /\*(\d+)/.exec(arg)[1];
+                        var m = /(\d+)\s*\*/.exec(arg)[1];
+                        var n = /\*\s*(\d+)/.exec(arg)[1];
                     }else{
                         m = arg;
                         n = arg2;
@@ -1568,7 +1789,7 @@ window.AlloyImage = $AI = window.psLib;
                     //得到颜色属性
                     var h = hsiObj.H + d30;
                     var color = ~~ (h / d60);
-                    var rColor = colorMap[color];
+                    var rColor = colorMap[color % 6];
 
                     func(hsiObj, rColor, data[i + 3]);
 

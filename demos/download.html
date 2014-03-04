@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+  <style type="text/css">
+img{
+  display: none;
+}
+div canvas{
+  width: 300px;
+}
+  </style>
+</head>
+<body>
+<img src="pic/20131109104333.jpg" id='p' style="display:block;float:left;width: 300px;" alt="" />
+<div id='au'></div>
+
+<button id="download">下载</button>
+
+<script type="text/javascript" src="alloyimage.js"></script>
+<script type="text/javascript">
+var $ = function(id){
+  return document.getElementById(id);
+};
+window.onload = function(){
+  var aum = $AI($('p'));
+  aum.ps('lomo').show();
+
+  $('download').onclick = function(){
+      aum.ps('lomo').saveFile('图片名字.jpg', 0.8);
+  };
+
+
+};
+</script>
+</body>
+</html>
