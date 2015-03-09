@@ -1,9 +1,10 @@
 body{
         background:#d2d0d0;
-        margin:0;
+        margin: 0 auto;
         font-family:Microsoft Yahei,Arial;
         min-width:1003px;
-        font-size:12px;
+        font-size: 12px;
+        max-width: 1500px;
 }
 img{
         vertical-align:middle;
@@ -16,9 +17,9 @@ img{
         background:#ecebeb;
         margin-bottom:10px;
         text-align:center;
-        color:navy;
+        color: rgb(97, 88, 212);
         padding:4px 0;
-        font-size:14px;
+        font-size: 16px;
 }
 .panel{
         background:#ecebeb;
@@ -45,18 +46,22 @@ img{
 }
 .left,.right{
         margin-top:20px;
-        height:430px;
+        min-height: 430px;
         background:#ecebeb;
 }
 .left{
-        float:left;
-        width:570px;
         position:relative;
+        margin-right: 230px;
+        padding: 1px;
 }
 .painting{
         position:absolute;
         left:0;
         top:0;
+        width: 100%;
+}
+.painting canvas{
+        width: 100%;
 }
 .openFile{
         font-size:25px;
@@ -108,23 +113,31 @@ img{
         position:fixed;
         z-index:10;
         background:#fff;
-        border:1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 0 8px 3px rgba(47, 47, 47, 0.35);
 }
 .commonmsgbox .title{
-        background:url(image/msgtitle.png) no-repeat;
-        margin-top:-5px;
         text-align:center;
-        color:#fff;
+        color: #2A2A2A;
         width:500px;
         line-height:40px;
         height:40px;
+        border-bottom: 1px solid rgb(240, 231, 231);
+        background: #fff;
+        border-radius: inherit;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
 }
 .commonmsgbox a{
         text-decoration:none;
 }
+.dragEl{
+    cursor: default;
+        
+}
 .commonmsgbox .commonmsg{
-        border-left:1px solid #ccc;
-        border-right:1px solid #ccc;
+        /* border-left:1px solid #ccc; */
+        /* border-right:1px solid #ccc; */
         color:#000;
 }
 .commonmsgbox .msgclose{

@@ -142,7 +142,7 @@ aside.links .linksWrapper{
     margin-left:40px;
 }
 #linkSimple{
-    margin-left:0px;
+    margin-left: 0px;
     background:url(../images/links_simple.png) 74px 53px no-repeat,url(../images/go.png) 170px 83px no-repeat;
     background-color:#3cb1bb;
 }

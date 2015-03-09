@@ -13,7 +13,7 @@
 
         this.i ++;
 
-        var html = "<div class='commonmsgbox'><div class='title'>";
+        var html = "<div class='commonmsgbox drag'><div class='title dragEl'>";
         html += this.title;
         html += "</div><div class='msgclose'>关闭</div><div class='commonmsg'>";
         html += this.msg;
@@ -278,7 +278,7 @@
             if(!(this.ps)){
                 this.ps = AlloyImage(parseInt(img.width),parseInt(img.height),"rgba(255,255,255,0)");
 
-                $(".left").css({width:img.width,height:img.height});
+                //$(".left").css({width:img.width,height:img.height});
                 $(".openFile").html("画布区");
             }
 
@@ -362,6 +362,42 @@
 
             var _this = this;
 
+            var draggableFlag = 0;
+            var x0, y0, x, y;
+            var targetEl;
+
+            $(".dragEl").live("mousedown", function(e){
+                var parent = $(this).parent(".drag");
+                
+                if(parent.length){
+                    targetEl = parent;
+
+                    x0 = e.clientX;
+                    y0 = e.clientY;
+
+                    x = parseInt(targetEl.css("left"));
+                    y = parseInt(targetEl.css("top"));
+
+                    draggableFlag = 1;
+
+                }
+            });
+                $("body").live("mousemove", function(e){
+                    if(draggableFlag){
+                        var x1 = e.clientX;
+                        var y1 = e.clientY;
+
+                        var dx = x1 - x0;
+                        var dy = y1 - y0;
+
+                        targetEl.css("left", (x + dx) + "px");
+                        targetEl.css("top", (y + dy) + "px");
+                    }
+                });
+                $("body").live("mouseup", function(e){
+                    draggableFlag = 0;
+                });
+
             //上传文件处理
             $("#upFile").change(function(e){
                 msg.title = "读取文件";
@@ -391,7 +427,7 @@
                 var psObj = AlloyImage(width,height,color);
                 if(!(_this.ps)){
                     _this.ps = AlloyImage(width,height,"rgba(255,255,255,0)");
-                    $(".left").css({width:width + "px", height:height + "px"});
+                    //$(".left").css({width:width + "px", height:height + "px"});
                     $(".openFile").html("画布区");
                 }
 
